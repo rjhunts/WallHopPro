@@ -1,10 +1,10 @@
 local arrow = workspace:WaitForChild("Objects"):WaitForChild("Arrow")
 local confetti = workspace:WaitForChild("Objects"):WaitForChild("Confetti")
+local Players = game:GetService("Players")
 local tween = game:GetService("TweenService")
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
-local functions = require(script.Parent.moduleScript)
+local functions = require(script.Parent.localModule)
 local spawners = workspace:WaitForChild("Spawners")
-local currentStage = functions.getCurrentStage()
 local fadeParticles = functions.fadeParticles
 
 local tweenInfo1 = TweenInfo.new(
@@ -65,7 +65,13 @@ local Tween2 = tween:Create(arrow, tweenInfo2, arrowPositionAndRotation)
 Tween1:Play()
 Tween2:Play()
 
-arrow.CFrame = CFrame.new(spawners[currentStage+1].Position) + Vector3.new(0, 5, 0)
+local currentStage = Players.LocalPlayer.leaderstats.Stage.Value
+if spawners:GetChildren()[currentStage + 1] then
+	arrow.CFrame = CFrame.new(spawners[currentStage+1].Position) + Vector3.new(0, 5, 0)
+else
+	arrow.Transparency = 1
+	print(spawners:GetChildren()[tostring(currentStage + 1)])
+end
 
 changeStage.OnClientEvent:Connect(function(currentStage)
 	local nextStage = spawners:FindFirstChild(currentStage+1)

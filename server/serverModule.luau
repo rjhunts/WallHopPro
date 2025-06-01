@@ -3,7 +3,7 @@ local functions = {}
 function functions.changeStage(player, spawner)
 	local changeStage = game:GetService("ReplicatedStorage"):WaitForChild("ChangeStage")
 	local stage = player.leaderstats.Stage
-	stage.Value = spawner.Name
+	stage.Value = tonumber(spawner.Name)
 	changeStage:FireClient(player, stage.Value)
 end
 

@@ -1,7 +1,7 @@
 local player = game:GetService("Players").LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local playerScripts = player:WaitForChild("PlayerScripts")
-local functions = require(playerScripts.moduleScript)
+local functions = require(playerScripts.localModule)
 local fadeTexture = functions.fadeTexture
 local staircases = workspace.Staircases
 for x, staircase in pairs(staircases:GetChildren()) do

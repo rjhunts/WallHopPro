@@ -3,7 +3,7 @@ local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local ragdollModule = require(game:GetService("ReplicatedStorage").ragdollModule)
 local characters = workspace:WaitForChild("Characters")
 local players = game:GetService("Players")
-local functions = require(script.Parent.module)
+local functions = require(script.Parent.serverModule)
 local playerCollisions = functions.playerCollisions
 local spawnPlayer = functions.spawnPlayer
 local change = functions.changeStage
@@ -25,12 +25,6 @@ players.PlayerAdded:Connect(function(player)
 			playerCollisions(descendant)
 		end
 	end)
-	local leaderstats = Instance.new("Folder", player)
-	leaderstats.Name = "leaderstats"
-	local stage = Instance.new("IntValue", leaderstats)
-	stage.Name = "Stage"
-	stage.Value = 0
-	spawnPlayer(player, stage)
 end)
 
 revivePlayer.OnServerEvent:Connect(spawnPlayer)

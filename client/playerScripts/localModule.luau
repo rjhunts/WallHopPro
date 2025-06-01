@@ -1,13 +1,5 @@
 local localFunctions = {}
 
-function localFunctions.getCurrentStage()
-	local players = game:GetService("Players")
-	local player = players.LocalPlayer
-	local leaderstats = player:WaitForChild("leaderstats")
-	local stage = leaderstats:WaitForChild("Stage")
-	return stage.Value
-end
-
 function localFunctions.tweenStage(spawner)
 	local tweenService = game:GetService("TweenService")
 	local tweenInfo = TweenInfo.new(0.75, Enum.EasingStyle.Back, Enum.EasingDirection.InOut, 0)
@@ -16,9 +8,7 @@ function localFunctions.tweenStage(spawner)
 		Color = Color3.fromRGB(75, 150, 75)
 	}
 	local tween = tweenService:Create(spawner, tweenInfo, properties)
-
 	tween:Play()
-
 	tween.Completed:Connect(function()
 		spawner.Orientation = Vector3.new(0, 0, 0)
 	end)
@@ -50,4 +40,14 @@ function localFunctions.fadeParticles(emitter, startTransparency, endTransparenc
 	end
 end
 
+function localFunctions.fixStages(current)
+	local spawners = workspace:WaitForChild("Spawners")
+	for i, v in pairs(spawners:GetChildren()) do
+		if tonumber(v.Name) <= current.Value then
+			v.Color = Color3.fromRGB(75, 150, 75)
+		else
+			v.Color = Color3.fromRGB(255, 255, 255)
+		end
+	end
+end
 return localFunctions
