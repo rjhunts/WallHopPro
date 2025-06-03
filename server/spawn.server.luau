@@ -25,6 +25,12 @@ players.PlayerAdded:Connect(function(player)
 			playerCollisions(descendant)
 		end
 	end)
+
+	local leaderstats = player:WaitForChild("leaderstats")
+	local stage = leaderstats:WaitForChild("Stage")
+	stage.Changed:Connect(function(value)
+		changeStage:FireClient(player, value)
+	end)
 end)
 
 revivePlayer.OnServerEvent:Connect(spawnPlayer)

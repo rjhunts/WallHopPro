@@ -4,9 +4,10 @@ local Players = game:GetService("Players")
 local tween = game:GetService("TweenService")
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local functions = require(script.Parent.localModule)
+local fixStages = functions.fixStages
+local tweenStage = functions.tweenStage
 local spawners = workspace:WaitForChild("Spawners")
 local fadeParticles = functions.fadeParticles
-
 local tweenInfo1 = TweenInfo.new(
 	1,
 	Enum.EasingStyle.Linear,
@@ -65,32 +66,41 @@ local Tween2 = tween:Create(arrow, tweenInfo2, arrowPositionAndRotation)
 Tween1:Play()
 Tween2:Play()
 
-local currentStage = Players.LocalPlayer.leaderstats.Stage.Value
-if spawners:GetChildren()[currentStage + 1] then
-	arrow.CFrame = CFrame.new(spawners[currentStage+1].Position) + Vector3.new(0, 5, 0)
-else
-	arrow.Transparency = 1
-	print(spawners:GetChildren()[tostring(currentStage + 1)])
-end
+function validateStage(currentStage)
+	local isNil = true
+	for i, v in pairs(spawners:GetChildren()) do
+		if v.Name == tostring(currentStage.Value + 1) then
+			isNil = false
+			if not isNil then
+				arrow.Transparency = 0
+				local arrowProperties = {
+					CFrame = v.CFrame + Vector3.new(0, 5, 0)
+				}
 
-changeStage.OnClientEvent:Connect(function(currentStage)
-	local nextStage = spawners:FindFirstChild(currentStage+1)
-	if nextStage then
-		local arrowProperties = {
-			CFrame = nextStage.CFrame + Vector3.new(0, 5, 0)
-		}
-
-		local moveArrowTween = tween:Create(arrow, tweenInfo4, arrowProperties)
-		moveArrowTween:Play()
-	else
-		task.spawn(function()
-			for i = 1, 100 do
-				arrow.Transparency = i / 100
-				task.wait()
+				local moveArrowTween = tween:Create(arrow, tweenInfo4, arrowProperties)
+				moveArrowTween:Play()
+			else
+				task.spawn(function()
+					for i = 1, 100 do
+						arrow.Transparency = i / 100
+						task.wait()
+					end
+				end)
+				fixStages(spawners[currentStage])
+				tweenStage(spawners[currentStage.Value])
 			end
-		end)
+		end
 	end
-
+	return isNil
+end
+local character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+if character then
+	validateStage(Players.LocalPlayer.leaderstats.Stage)
+end
+changeStage.OnClientEvent:Connect(function(currentStage)
+	print(currentStage)
+	validateStage(Players.LocalPlayer.leaderstats.Stage)
+	fixStages(Players.LocalPlayer.leaderstats.Stage)
 	local confettiClone = confetti:Clone()
 	confettiClone.Parent = workspace:FindFirstChild("Temp")
 	confettiClone.CFrame = CFrame.new(spawners[currentStage].Position) + Vector3.new(0, 3.5, 0)

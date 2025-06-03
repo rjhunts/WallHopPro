@@ -41,8 +41,9 @@ function localFunctions.fadeParticles(emitter, startTransparency, endTransparenc
 end
 
 function localFunctions.fixStages(current)
+	print(current)
 	local spawners = workspace:WaitForChild("Spawners")
-	for i, v in pairs(spawners:GetChildren()) do
+	for i, v in spawners:GetChildren() do
 		if tonumber(v.Name) <= current.Value then
 			v.Color = Color3.fromRGB(75, 150, 75)
 		else
