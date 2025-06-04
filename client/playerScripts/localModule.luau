@@ -1,25 +1,39 @@
 local localFunctions = {}
 
 function localFunctions.tweenStage(spawner)
+	local players = game:GetService("Players")
 	local tweenService = game:GetService("TweenService")
 	local tweenInfo = TweenInfo.new(0.75, Enum.EasingStyle.Back, Enum.EasingDirection.InOut, 0)
+	local tweenInfo_2 = TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0)
+
 	local properties = {
 		CFrame = spawner.CFrame * CFrame.Angles(0, math.rad(180), 0),
+	}
+
+	local properties_2 = {
 		Color = Color3.fromRGB(75, 150, 75)
 	}
+
 	local tween = tweenService:Create(spawner, tweenInfo, properties)
+	local tween_2 = tweenService:Create(spawner, tweenInfo_2, properties_2)
+
 	tween:Play()
+	tween_2:Play()
+
 	tween.Completed:Connect(function()
 		spawner.Orientation = Vector3.new(0, 0, 0)
+		localFunctions.fixStages(players.LocalPlayer.leaderstats.Stage)
 	end)
 end
 
 function localFunctions.fadeTexture(texture, bool)
+
 	if texture.ClassName == "Texture" and bool then
 		for i = 80, 100 do
 			texture.Transparency = i / 100
 			task.wait()
 		end
+
 	elseif texture.ClassName == "Texture" and not bool then
 		for i = 100, 80, -1 do
 			texture.Transparency = i / 100
@@ -41,7 +55,6 @@ function localFunctions.fadeParticles(emitter, startTransparency, endTransparenc
 end
 
 function localFunctions.fixStages(current)
-	print(current)
 	local spawners = workspace:WaitForChild("Spawners")
 	for i, v in spawners:GetChildren() do
 		if tonumber(v.Name) <= current.Value then

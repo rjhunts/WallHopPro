@@ -19,7 +19,7 @@ game.Players.PlayerAdded:Connect(function(player)
         }
     end)
 
-    if success then
+    if success and success == not nil then
         stage.Value = dataStore:GetAsync(player.UserId .. "stage")
         coins.Value = dataStore:GetAsync(player.UserId .. "coins")
     else

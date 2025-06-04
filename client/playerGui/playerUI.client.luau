@@ -1,4 +1,4 @@
-local UI = script.Parent
+local UI = script.Parent.Parent.ScreenGui
 local buttons = UI.ButtonsFrame
 local shopButton = buttons.Shop
 local shopFrame = UI.ShopFrame

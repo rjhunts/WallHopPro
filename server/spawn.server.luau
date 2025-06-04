@@ -28,8 +28,20 @@ players.PlayerAdded:Connect(function(player)
 
 	local leaderstats = player:WaitForChild("leaderstats")
 	local stage = leaderstats:WaitForChild("Stage")
+	local previous = stage.Value
 	stage.Changed:Connect(function(value)
-		changeStage:FireClient(player, value)
+		local isForced = true
+		if value == previous + 1 then
+			isForced = false
+		end
+		--print(isForced)
+		changeStage:FireClient(player, value, isForced)
+		if not player.Character then
+			spawnPlayer(player, stage, "dead", isForced)
+		else
+			spawnPlayer(player, stage, "alive", isForced)
+		end
+		previous = value
 	end)
 end)
 

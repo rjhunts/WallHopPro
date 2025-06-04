@@ -1,18 +1,23 @@
 local functions = {}
 
-function functions.changeStage(player, spawner)
-	local changeStage = game:GetService("ReplicatedStorage"):WaitForChild("ChangeStage")
+function functions.changeStage(player, spawner, isForced)
 	local stage = player.leaderstats.Stage
 	stage.Value = tonumber(spawner.Name)
-	changeStage:FireClient(player, stage.Value)
 end
 
-function functions.spawnPlayer(player, stage, status)
+function functions.spawnPlayer(player, stage, status, isForced)
 	local spawners = workspace.Spawners
-	if not player.Character or status == "dead" then
+	local spawner = spawners[tostring(stage.Value)]
+	
+	if status == "dead" and isForced then
 		player:LoadCharacter()
+		local character = player.Character or player.CharacterAdded:Wait()
+		character.HumanoidRootPart.CFrame = spawner.CFrame + Vector3.new(0, 3, 0)
+	
+	elseif status == "alive" and isForced then
+		local character = player.Character or player.CharacterAdded:Wait()
+		character.HumanoidRootPart.CFrame = spawner.CFrame + Vector3.new(0, 3, 0)
 	end
-	player.character.HumanoidRootPart.CFrame = spawners[stage.Value].CFrame + Vector3.new(0, 3, 0)
 end
 
 function functions.loopKillBlocks()

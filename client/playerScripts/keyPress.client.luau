@@ -7,7 +7,7 @@ UIS.InputBegan:Connect(function(input, gameProcess)
 	if not gameProcess then
 		if input.KeyCode == Enum.KeyCode.R then
 			local stage = player.leaderstats.Stage
-			revivePlayer:FireServer(stage)
+			revivePlayer:FireServer(stage, "alive", true)
 
 		elseif input.KeyCode == Enum.KeyCode.Comma then
 			workspace.CurrentCamera:PanUnits(-1)

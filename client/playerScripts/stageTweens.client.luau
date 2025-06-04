@@ -1,13 +1,13 @@
 local arrow = workspace:WaitForChild("Objects"):WaitForChild("Arrow")
 local confetti = workspace:WaitForChild("Objects"):WaitForChild("Confetti")
-local Players = game:GetService("Players")
+local players = game:GetService("Players")
 local tween = game:GetService("TweenService")
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local functions = require(script.Parent.localModule)
-local fixStages = functions.fixStages
 local tweenStage = functions.tweenStage
 local spawners = workspace:WaitForChild("Spawners")
 local fadeParticles = functions.fadeParticles
+
 local tweenInfo1 = TweenInfo.new(
 	1,
 	Enum.EasingStyle.Linear,
@@ -68,7 +68,9 @@ Tween2:Play()
 
 function validateStage(currentStage)
 	local isNil = true
+	local spawnList = {}
 	for i, v in pairs(spawners:GetChildren()) do
+		spawnList[i] = v.Name
 		if v.Name == tostring(currentStage.Value + 1) then
 			isNil = false
 			if not isNil then
@@ -79,28 +81,23 @@ function validateStage(currentStage)
 
 				local moveArrowTween = tween:Create(arrow, tweenInfo4, arrowProperties)
 				moveArrowTween:Play()
-			else
-				task.spawn(function()
-					for i = 1, 100 do
-						arrow.Transparency = i / 100
-						task.wait()
-					end
-				end)
-				fixStages(spawners[currentStage])
-				tweenStage(spawners[currentStage.Value])
 			end
 		end
 	end
+	if table.find(spawnList, tostring(currentStage.Value + 1)) == nil then
+		task.spawn(function()
+			for i = 1, 100 do
+				arrow.Transparency = i / 100
+				task.wait()
+			end
+		end)
+	end
 	return isNil
 end
-local character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-if character then
-	validateStage(Players.LocalPlayer.leaderstats.Stage)
-end
+
 changeStage.OnClientEvent:Connect(function(currentStage)
-	print(currentStage)
-	validateStage(Players.LocalPlayer.leaderstats.Stage)
-	fixStages(Players.LocalPlayer.leaderstats.Stage)
+	validateStage(players.LocalPlayer.leaderstats.Stage)
+	tweenStage(spawners[currentStage])
 	local confettiClone = confetti:Clone()
 	confettiClone.Parent = workspace:FindFirstChild("Temp")
 	confettiClone.CFrame = CFrame.new(spawners[currentStage].Position) + Vector3.new(0, 3.5, 0)
