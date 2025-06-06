@@ -22,12 +22,13 @@ game.Players.PlayerAdded:Connect(function(player)
     if success and success == not nil then
         stage.Value = dataStore:GetAsync(player.UserId .. "stage")
         coins.Value = dataStore:GetAsync(player.UserId .. "coins")
+        --print("Successful")
     else
         print(err)
         stage.Value = 0
         coins.Value = 0
     end
-    spawnPlayer(player, stage)
+    spawnPlayer(player, stage.Value, "dead", true)
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)

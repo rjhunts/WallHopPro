@@ -1,19 +1,32 @@
 local functions = {}
 
+local revivePlayer = game:GetService("ReplicatedStorage"):WaitForChild("RevivePlayer")
+
+function functions.updateCoins(player, amount)
+	local coins = player.leaderstats.Coins
+	coins.Value = tonumber(amount)
+end
+
 function functions.changeStage(player, spawner, isForced)
 	local stage = player.leaderstats.Stage
 	stage.Value = tonumber(spawner.Name)
+
+	local stageNumber = player.PlayerGui:WaitForChild("ScreenGui").StagesFrame.ButtonsFrame.ImageLabel.StageNumber
+	stageNumber.Text = tonumber(spawner.Name)
 end
 
 function functions.spawnPlayer(player, stage, status, isForced)
 	local spawners = workspace.Spawners
-	local spawner = spawners[tostring(stage.Value)]
+	local spawner = spawners[tostring(stage)]
 	
 	if status == "dead" and isForced then
 		player:LoadCharacter()
 		local character = player.Character or player.CharacterAdded:Wait()
 		character.HumanoidRootPart.CFrame = spawner.CFrame + Vector3.new(0, 3, 0)
-	
+		
+		local stageNumber = player.PlayerGui:WaitForChild("ScreenGui").StagesFrame.ButtonsFrame.ImageLabel.StageNumber
+		stageNumber.Text = stage
+
 	elseif status == "alive" and isForced then
 		local character = player.Character or player.CharacterAdded:Wait()
 		character.HumanoidRootPart.CFrame = spawner.CFrame + Vector3.new(0, 3, 0)

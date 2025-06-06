@@ -1,12 +1,15 @@
 local arrow = workspace:WaitForChild("Objects"):WaitForChild("Arrow")
 local confetti = workspace:WaitForChild("Objects"):WaitForChild("Confetti")
 local players = game:GetService("Players")
+local player = players.LocalPlayer
 local tween = game:GetService("TweenService")
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local functions = require(script.Parent.localModule)
 local tweenStage = functions.tweenStage
 local spawners = workspace:WaitForChild("Spawners")
 local fadeParticles = functions.fadeParticles
+local playerUI = player:WaitForChild("PlayerGui")
+local screenUI = playerUI:WaitForChild("ScreenGui")
 
 local tweenInfo1 = TweenInfo.new(
 	1,
@@ -96,25 +99,30 @@ function validateStage(currentStage)
 end
 
 changeStage.OnClientEvent:Connect(function(currentStage)
-	validateStage(players.LocalPlayer.leaderstats.Stage)
+	validateStage(player.leaderstats.Stage)
 	tweenStage(spawners[currentStage])
+
 	local confettiClone = confetti:Clone()
 	confettiClone.Parent = workspace:FindFirstChild("Temp")
 	confettiClone.CFrame = CFrame.new(spawners[currentStage].Position) + Vector3.new(0, 3.5, 0)
+
 	for i, v in pairs(confettiClone:GetChildren()) do
 		if v:IsA("ParticleEmitter") then
 			task.spawn(fadeParticles, v, 1, 0)
 		end
 	end
+
 	confettiClone["Popping Confetti Sound Effect"]:Play()
 	confettiClone["confetti Sound effect"]:Play()
 	confettiClone["Yay!"]:Play()
 	task.wait(3)
+
 	for i, v in pairs(confettiClone:GetChildren()) do
 		if v:IsA("ParticleEmitter") then
 			task.spawn(fadeParticles, v, 0, 1)
 		end
 	end
+
 	task.wait(3)
 	confettiClone:Destroy()
 end)

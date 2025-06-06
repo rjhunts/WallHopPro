@@ -1,12 +1,14 @@
 local revivePlayer = game:GetService("ReplicatedStorage"):WaitForChild("RevivePlayer")
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
+local changeCoins = game:GetService("ReplicatedStorage").ChangeCoins
 local ragdollModule = require(game:GetService("ReplicatedStorage").ragdollModule)
 local characters = workspace:WaitForChild("Characters")
 local players = game:GetService("Players")
 local functions = require(script.Parent.serverModule)
 local playerCollisions = functions.playerCollisions
 local spawnPlayer = functions.spawnPlayer
-local change = functions.changeStage
+local updateStage = functions.changeStage
+local updateCoins = functions.updateCoins
 
 players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
@@ -36,14 +38,15 @@ players.PlayerAdded:Connect(function(player)
 		end
 		--print(isForced)
 		changeStage:FireClient(player, value, isForced)
-		if not player.Character then
-			spawnPlayer(player, stage, "dead", isForced)
+		if player.Character == nil then
+			spawnPlayer(player, stage.Value, "dead", isForced)
 		else
-			spawnPlayer(player, stage, "alive", isForced)
+			spawnPlayer(player, stage.Value, "alive", isForced)
 		end
 		previous = value
 	end)
 end)
 
 revivePlayer.OnServerEvent:Connect(spawnPlayer)
-changeStage.OnServerEvent:Connect(change)
+changeStage.OnServerEvent:Connect(updateStage)
+changeCoins.OnServerEvent:Connect(updateCoins)
