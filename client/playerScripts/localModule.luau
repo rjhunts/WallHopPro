@@ -64,4 +64,89 @@ function localFunctions.fixStages(current)
 		end
 	end
 end
+
+function localFunctions.resetButtons()
+	local dynamicFolder = game.Workspace:WaitForChild("Dynamic")
+	for _, v in dynamicFolder:GetChildren() do
+		if v.Name == "Transparent" then
+			local parts = v.Parts
+			for _, part in parts:GetChildren() do
+				part.Transparency = 0.75
+				part.CanCollide = false
+			end
+			local button = v.Button
+			local active = v.Active
+			active.Value = false
+			--print(isActive)
+
+			local timer = button.BillboardGui.TextLabel
+			timer.Text = ""
+
+			local trigger = button.Trigger
+			trigger.Color = Color3.fromRGB(0, 255,255)
+		end
+	end
+end
+
+function localFunctions.loopButtons()
+	local dynamicFolder = game.Workspace:WaitForChild("Dynamic")
+	for _, v in dynamicFolder:GetChildren() do
+		task.spawn(function()
+			if v.Name == "Transparent" then
+				local parts = v.Parts
+				local button = v.Button
+				local duration = v.Timer.Value
+				local active = v.Active
+				local timer = button.BillboardGui.TextLabel
+				timer.Text = ""
+
+				local trigger = button.Trigger
+				local debounce = true
+				trigger.Touched:Connect(function(object)
+					if object.Parent.Humanoid ~= nil and debounce then
+						debounce = false
+						active.Value = true
+						timer.Text = tostring(duration)
+						trigger.Color = Color3.fromRGB(255, 66, 66)
+						for _, part in parts:GetChildren() do
+							task.spawn(function()
+								part.Transparency = 0
+								part.CanCollide = true
+							end)
+						end
+						for i = 1, duration+1 do
+							if active.Value then
+								timer.Text = tostring(duration - i+1)
+								task.wait(1)
+							else
+								break
+							end
+						end
+						timer.Text = ""
+						localFunctions.resetButtons()
+						debounce = true
+					end
+				end)
+
+			elseif v.Name == "Beat Blocks" then
+				local models = v.Models
+				local duration = v.Timer.Value
+				local function switcher(model, transparency, cancollide)
+					for _, part in model:GetChildren() do
+						part.Transparency = transparency
+						part.CanCollide = cancollide
+					end
+				end
+				repeat
+					for i = 1, #models:GetChildren() do
+						switcher(models[i], 0, true)
+						task.wait(duration)
+						switcher(models[i], 0.75, false)
+					end
+				until nil
+			end
+		end)
+	end
+end
+
 return localFunctions

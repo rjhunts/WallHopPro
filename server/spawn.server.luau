@@ -1,4 +1,5 @@
 local revivePlayer = game:GetService("ReplicatedStorage"):WaitForChild("RevivePlayer")
+local getItems = game:GetService("ReplicatedStorage").GetItems
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local changeCoins = game:GetService("ReplicatedStorage").ChangeCoins
 local ragdollModule = require(game:GetService("ReplicatedStorage").ragdollModule)
@@ -10,12 +11,15 @@ local spawnPlayer = functions.spawnPlayer
 local updateStage = functions.changeStage
 local updateCoins = functions.updateCoins
 
+
 players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
 		character.Humanoid.BreakJointsOnDeath = false
+
 		character.Humanoid.Died:Connect(function()
 			ragdollModule.SetRagdoll(character)
 		end)
+
 		character.Parent = characters
 		local light = Instance.new("PointLight", character:WaitForChild("HumanoidRootPart"))
 		light.Shadows = true
@@ -50,3 +54,9 @@ end)
 revivePlayer.OnServerEvent:Connect(spawnPlayer)
 changeStage.OnServerEvent:Connect(updateStage)
 changeCoins.OnServerEvent:Connect(updateCoins)
+
+getItems.OnServerEvent:Connect(function(player, item)
+	local items = game:GetService("ServerStorage"):WaitForChild("Items")
+	local clonedItem = items[`{item}`]:Clone()
+	clonedItem.Parent = player.Backpack
+end)

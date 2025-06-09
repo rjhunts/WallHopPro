@@ -1,19 +1,20 @@
 local player = game:GetService("Players").LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
-local camera = workspace.CurrentCamera
 local revivePlayer = game:GetService("ReplicatedStorage").RevivePlayer
+local getItems = game:GetService("ReplicatedStorage").GetItems
 local UIS = game:GetService("UserInputService")
-
 local leaderstats = player:WaitForChild("leaderstats")
 local stage = leaderstats:WaitForChild("Stage")
-
-local functions = require(player.PlayerScripts.localModule)
-local tweenStage = functions.tweenStage
-local fixStages = functions.fixStages
 local spawners = workspace:WaitForChild("Spawners")
 local UI = script.Parent.Parent.ScreenGui
 local buttons = UI.ButtonsFrame
+local playerScripts = player:WaitForChild("PlayerScripts")
+local functions = require(playerScripts.localModule)
+local resetButtons = functions.resetButtons
+local loopButtons = functions.loopButtons
+
+-- Stage UI Variables
 
 local stagesFrame = UI.StagesFrame
 local stageButtons = stagesFrame.ButtonsFrame
@@ -23,16 +24,36 @@ local stageNumber = stageButtons.ImageLabel.StageNumber
 local forward = stageButtons.ImageLabel.Forward
 local doubleForward = stageButtons.ImageLabel.DoubleForward
 
+-- Shop UI Variables
+
 local shopFrame = buttons.ShopFrame
 local shopButton = shopFrame.ImageLabel.Shop
 local shopFrame = UI.ShopFrame
 
-local settingsFrame = buttons.SettingsFrame
-local settingsButton = settingsFrame.ImageLabel.Settings
-local settingsFrame = UI.SettingsFrame
+-- Coils --
+
+local coilsFrame = shopFrame.ScrollingFrame.ShopFrame.Frame.Coils
+local gravityCoilFrame = coilsFrame.GravityCoil
+local speedCoilFrame = coilsFrame.SpeedCoil
+local fusionCoilFrame = coilsFrame.FusionCoil 
+
+-- Reset UI Variables
 
 local resetFrame = buttons.ResetFrame
 local resetButton = resetFrame.ImageLabel.Reset
+
+-- Settings UI Variables
+
+local settingsFrame = buttons.SettingsFrame
+local settingsButton = settingsFrame.ImageLabel.Settings
+local settingsFrame = UI.SettingsFrame
+local options = settingsFrame.ScrollingFrame.SettingsFrame.Options
+local musicFrame = options.Music
+local musicButton = musicFrame.ButtonFrame.TextButton
+local playersFrame = options.Players
+local playerButton = playersFrame.ButtonFrame.TextButton
+local rebirthFrame = options.Rebirth
+local rebirthButton = rebirthFrame.ButtonFrame.TextButton
 
 local StarterGui = game:GetService("StarterGui")
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
@@ -46,6 +67,32 @@ function switchFrame(frame, frame2)
 	end
 end
 
+-- Shop UI --
+
+local marketPlaceService = game:GetService("MarketplaceService")
+gravityCoilFrame.TextButton.MouseButton1Click:Connect(function()
+	marketPlaceService:PromptGamePassPurchase(player, 1250422439)
+end)
+
+speedCoilFrame.TextButton.MouseButton1Click:Connect(function()
+	marketPlaceService:PromptGamePassPurchase(player, 1246890966)
+end)
+
+fusionCoilFrame.TextButton.MouseButton1Click:Connect(function()
+	marketPlaceService:PromptGamePassPurchase(player, 1249784608)
+end)
+
+marketPlaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamePassId, wasPurchased)
+	if gamePassId == 1250422439 and wasPurchased then
+		getItems:FireServer("Gravity Coil")
+
+	elseif gamePassId == 1246890966 and wasPurchased then
+		getItems:FireServer("Speed Coil")
+		
+	elseif gamePassId == 1249784608 and wasPurchased then
+		getItems:FireServer("Fusion Coil")
+	end
+end)
 -- Stages UI --
 
 for i, v in pairs(stageButtons.ImageLabel:GetChildren()) do
@@ -67,8 +114,7 @@ end)
 UIS.InputBegan:Connect(function(input, gameProcess)
 	if not gameProcess then
 		if input.KeyCode == Enum.KeyCode.R then
-			local stage = currentStage
-			revivePlayer:FireServer(stage, "alive", true)
+			teleport()
 
 		elseif input.KeyCode == Enum.KeyCode.Comma then
 			workspace.CurrentCamera:PanUnits(-1)
@@ -82,20 +128,20 @@ end)
 function firstStage()
 	currentStage = 0
 	stageNumber.Text = currentStage
-	hrp.CFrame = CFrame.new(spawners[currentStage].Position) + Vector3.new(0, 3.5, 0)
+	hrp.CFrame = spawners[currentStage].CFrame + Vector3.new(0, 3.5, 0)
 end
 
 function lastStage()
 	currentStage = stage.Value
 	stageNumber.Text = currentStage
-	hrp.CFrame = CFrame.new(spawners[currentStage].Position) + Vector3.new(0, 3.5, 0)
+	hrp.CFrame = spawners[currentStage].CFrame + Vector3.new(0, 3.5, 0)
 end
 
 function incrementStage(value)
 	--print("Foward: 1")
 	currentStage += value
 	stageNumber.Text = currentStage
-	hrp.CFrame = CFrame.new(spawners[currentStage].Position) + Vector3.new(0, 3.5, 0)
+	hrp.CFrame = spawners[currentStage].CFrame + Vector3.new(0, 3.5, 0)
 	--print(currentStage)
 end
 
@@ -134,6 +180,7 @@ doubleBack.MouseButton1Click:Connect(function()
 		firstStage()
 	end
 end)
+
 -- Shop UI --
 
 shopButton.MouseButton1Click:Connect(function()
@@ -181,10 +228,12 @@ end)
 function respawn()
 	task.wait(3)
 	revivePlayer:FireServer(currentStage, "dead", true)
+	resetButtons()
 end
 
 function teleport()
 	revivePlayer:FireServer(currentStage, "alive", true)
+	resetButtons()
 end
 
 resetButton.MouseButton1Click:Connect(teleport)
