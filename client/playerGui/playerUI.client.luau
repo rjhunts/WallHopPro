@@ -9,6 +9,7 @@ local stage = leaderstats:WaitForChild("Stage")
 local spawners = workspace:WaitForChild("Spawners")
 local UI = script.Parent.Parent.ScreenGui
 local buttons = UI.ButtonsFrame
+local buttons2 = UI.ButtonsFrame2
 local playerScripts = player:WaitForChild("PlayerScripts")
 local functions = require(playerScripts.localModule)
 local resetButtons = functions.resetButtons
@@ -30,16 +31,31 @@ local shopFrame = buttons.ShopFrame
 local shopButton = shopFrame.ImageLabel.Shop
 local shopFrame = UI.ShopFrame
 
--- Coils --
+-- Cosemetics UI Variables
+
+local cosmeticsButton = buttons.CosmeticsFrame.ImageLabel.Cosmetics
+local cosmeticFrame = UI.CosmeticsFrame
+
+-- Skip Stage Variables
+
+local skipFrame = UI.SkipFrame
+local skipButton = skipFrame.ButtonsFrame.ImageLabel.Skip
+
+-- Coils Variables
 
 local coilsFrame = shopFrame.ScrollingFrame.ShopFrame.Frame.Coils
 local gravityCoilFrame = coilsFrame.GravityCoil
 local speedCoilFrame = coilsFrame.SpeedCoil
 local fusionCoilFrame = coilsFrame.FusionCoil 
 
+-- Coins Variables
+
+local coinsFrame = shopFrame.ScrollingFrame.ShopFrame.Frame.Coins
+local buyCoins = game:GetService("ReplicatedStorage"):WaitForChild("BuyCoins")
+
 -- Reset UI Variables
 
-local resetFrame = buttons.ResetFrame
+local resetFrame = buttons2.ResetFrame
 local resetButton = resetFrame.ImageLabel.Reset
 
 -- Settings UI Variables
@@ -58,18 +74,54 @@ local rebirthButton = rebirthFrame.ButtonFrame.TextButton
 local StarterGui = game:GetService("StarterGui")
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
 
-function switchFrame(frame, frame2)
+function switchFrame(frame)
 	if not frame.Visible then
-		frame2.Visible = false
+		UI.ShopFrame.Visible = false
+		UI.SettingsFrame.Visible = false
+		UI.CosmeticsFrame.Visible = false
 		frame.Visible = true
 	else
 		frame.Visible = false
 	end
 end
 
--- Shop UI --
-
 local marketPlaceService = game:GetService("MarketplaceService")
+
+-- Skip Stage
+
+skipButton.MouseButton1Click:Connect(function()
+	marketPlaceService:PromptProductPurchase(player, 3303947543)
+end)
+
+-- Coins UI
+
+for _, frame in coinsFrame:GetChildren() do
+	if frame.ClassName == "Frame" then
+		local button = frame.TextButton
+		button.MouseButton1Click:Connect(function()
+			buyCoins:FireServer(frame.Name)
+		end)
+	end
+end
+
+buyCoins.OnClientEvent:Connect(function(frame)
+	if frame == "Coins1" then
+		marketPlaceService:PromptProductPurchase(player, 3303921169)
+	elseif frame == "Coins2" then
+		marketPlaceService:PromptProductPurchase(player, 3303921633)
+	elseif frame == "Coins3" then
+		marketPlaceService:PromptProductPurchase(player, 3303922025)
+	elseif frame == "Coins4" then
+		marketPlaceService:PromptProductPurchase(player, 3303922860)
+	elseif frame == "Coins5" then
+		marketPlaceService:PromptProductPurchase(player, 3303941156)
+	elseif frame == "Coins6" then
+		marketPlaceService:PromptProductPurchase(player, 3303944448)
+	end
+end)
+
+-- Shop UI
+
 gravityCoilFrame.TextButton.MouseButton1Click:Connect(function()
 	marketPlaceService:PromptGamePassPurchase(player, 1250422439)
 end)
@@ -93,7 +145,8 @@ marketPlaceService.PromptGamePassPurchaseFinished:Connect(function(player, gameP
 		getItems:FireServer("Fusion Coil")
 	end
 end)
--- Stages UI --
+
+-- Stages UI
 
 for i, v in pairs(stageButtons.ImageLabel:GetChildren()) do
 	if v.ClassName == "TextButton" then
@@ -181,10 +234,10 @@ doubleBack.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Shop UI --
+-- Shop UI
 
 shopButton.MouseButton1Click:Connect(function()
-	switchFrame(shopFrame, settingsFrame)
+	switchFrame(shopFrame)
 end)
 
 shopButton.MouseEnter:Connect(function()
@@ -197,10 +250,16 @@ shopButton.MouseLeave:Connect(function()
 	--shopButton.Parent.ImageTransparency = 0.9
 end)
 
--- Settings UI --
+-- Cosmetics UI
+
+cosmeticsButton.MouseButton1Click:Connect(function()
+	switchFrame(cosmeticFrame)
+end)
+
+-- Settings UI
 
 settingsButton.MouseButton1Click:Connect(function()
-	switchFrame(settingsFrame, shopFrame)
+	switchFrame(settingsFrame)
 end)
 
 settingsButton.MouseEnter:Connect(function()
@@ -213,7 +272,7 @@ settingsButton.MouseLeave:Connect(function()
 	--settingsButton.Parent.ImageTransparency = 0.9
 end)
 
--- Reset UI --
+-- Reset UI
 
 resetButton.MouseEnter:Connect(function()
 	resetButton.TextTransparency = 0.25

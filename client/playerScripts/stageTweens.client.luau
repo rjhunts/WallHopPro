@@ -75,6 +75,7 @@ function validateStage(currentStage)
 	for i, v in pairs(spawners:GetChildren()) do
 		spawnList[i] = v.Name
 		if v.Name == tostring(currentStage.Value + 1) then
+			screenUI:WaitForChild("SkipFrame").Visible = true
 			isNil = false
 			if not isNil then
 				arrow.Transparency = 0
@@ -88,6 +89,7 @@ function validateStage(currentStage)
 		end
 	end
 	if table.find(spawnList, tostring(currentStage.Value + 1)) == nil then
+		screenUI:WaitForChild("SkipFrame").Visible = false
 		task.spawn(function()
 			for i = 1, 100 do
 				arrow.Transparency = i / 100

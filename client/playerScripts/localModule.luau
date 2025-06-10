@@ -90,6 +90,7 @@ end
 
 function localFunctions.loopButtons()
 	local dynamicFolder = game.Workspace:WaitForChild("Dynamic")
+	local UITimer = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("Timer")
 	for _, v in dynamicFolder:GetChildren() do
 		task.spawn(function()
 			if v.Name == "Transparent" then
@@ -103,10 +104,12 @@ function localFunctions.loopButtons()
 				local trigger = button.Trigger
 				local debounce = true
 				trigger.Touched:Connect(function(object)
-					if object.Parent.Humanoid ~= nil and debounce then
+					if object.Parent.Humanoid and debounce then
+						UITimer.Visible = true
 						debounce = false
 						active.Value = true
 						timer.Text = tostring(duration)
+						UITimer.TimerFrame.ImageLabel.Timer.Text = timer.Text
 						trigger.Color = Color3.fromRGB(255, 66, 66)
 						for _, part in parts:GetChildren() do
 							task.spawn(function()
@@ -117,6 +120,7 @@ function localFunctions.loopButtons()
 						for i = 1, duration+1 do
 							if active.Value then
 								timer.Text = tostring(duration - i+1)
+								UITimer.TimerFrame.ImageLabel.Timer.Text = timer.Text
 								task.wait(1)
 							else
 								break
@@ -125,6 +129,7 @@ function localFunctions.loopButtons()
 						timer.Text = ""
 						localFunctions.resetButtons()
 						debounce = true
+						UITimer.Visible = false
 					end
 				end)
 

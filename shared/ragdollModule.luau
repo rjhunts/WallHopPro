@@ -60,7 +60,7 @@ function ragdoll.SetRagdoll(char)
 						clonedBodyPart.CanTouch = true
 						local soundDebounce = true
 						local touchTrigger = clonedBodyPart.Touched:Connect(function(hit)
-							if hit and not hit.Parent:FindFirstChild("Humanoid") and not hit.Parent.Parent:FindFirstChild("Humanoid") then
+							if hit and not hit.Parent:FindFirstChild("Humanoid") and not hit.Parent.Parent:FindFirstChild("Humanoid") == nil then
 								local clonedPartVelocity = math.round(((clonedBodyPart.Velocity).Magnitude))
 								if clonedPartVelocity > 2 and soundDebounce == true then
 									soundDebounce = false

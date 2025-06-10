@@ -2,7 +2,6 @@ local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local updateCoins = game:GetService("ReplicatedStorage").ChangeCoins
 local spawners = workspace.Spawners
 local player = game:GetService("Players").LocalPlayer
-local stageNumber = player.PlayerGui:WaitForChild("ScreenGui").StagesFrame.ButtonsFrame.ImageLabel.StageNumber
 local leaderstats = player:WaitForChild("leaderstats")
 local stage = leaderstats:WaitForChild("Stage")
 local coins = leaderstats:WaitForChild("Coins")
@@ -17,6 +16,7 @@ for i, spawner in pairs(spawners:GetChildren()) do
 					changeStage:FireServer(spawners[stage.Value + 1])
 					updateCoins:FireServer(coins.Value + 10)
 				elseif tonumber(spawner.Name) <= stage.Value then
+					local stageNumber = player.PlayerGui:WaitForChild("ScreenGui").StagesFrame.ButtonsFrame.ImageLabel.StageNumber
 					stageNumber.Text = spawner.Name
 				end
 			end
