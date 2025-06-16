@@ -2,6 +2,8 @@ local revivePlayer = game:GetService("ReplicatedStorage"):WaitForChild("RevivePl
 local getItems = game:GetService("ReplicatedStorage").GetItems
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local changeCoins = game:GetService("ReplicatedStorage").ChangeCoins
+local buyTrail = game:GetService("ReplicatedStorage").BuyTrail
+local equipTrail = game:GetService("ReplicatedStorage").EquipTrail
 local ragdollModule = require(game:GetService("ReplicatedStorage").ragdollModule)
 local characters = workspace:WaitForChild("Characters")
 local players = game:GetService("Players")
@@ -10,13 +12,14 @@ local playerCollisions = functions.playerCollisions
 local spawnPlayer = functions.spawnPlayer
 local updateStage = functions.changeStage
 local updateCoins = functions.updateCoins
-
+local purchaseTrail = functions.purchaseTrail
+local toggleTrail = functions.toggleTrail
 
 players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
-		character.Humanoid.BreakJointsOnDeath = false
+		character:WaitForChild("Humanoid").BreakJointsOnDeath = false
 
-		character.Humanoid.Died:Connect(function()
+		character:WaitForChild("Humanoid").Died:Connect(function()
 			ragdollModule.SetRagdoll(character)
 		end)
 
@@ -54,7 +57,8 @@ end)
 revivePlayer.OnServerEvent:Connect(spawnPlayer)
 changeStage.OnServerEvent:Connect(updateStage)
 changeCoins.OnServerEvent:Connect(updateCoins)
-
+buyTrail.OnServerEvent:Connect(purchaseTrail)
+equipTrail.OnServerEvent:Connect(toggleTrail)
 getItems.OnServerEvent:Connect(function(player, item)
 	local items = game:GetService("ServerStorage"):WaitForChild("Items")
 	local clonedItem = items[`{item}`]:Clone()

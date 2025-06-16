@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
 local buyCoins = game:GetService("ReplicatedStorage"):WaitForChild("BuyCoins")
+local sendTrails = game:GetService("ReplicatedStorage"):WaitForChild("SendTrails")
+local getTrails = game:GetService("ReplicatedStorage"):WaitForChild("GetTrails")
 local dataStoreService = game:GetService("DataStoreService")
 local dataStore = dataStoreService:GetDataStore("database")
 local functions = require(script.Parent.serverModule)
@@ -9,7 +11,8 @@ function getPlayerData(player)
     local success, err = pcall(function()
         return {
             dataStore:GetAsync(player.UserId .. "stage") and
-            dataStore:GetAsync(player.UserId .. "coins")
+            dataStore:GetAsync(player.UserId .. "coins") and
+            dataStore:GetAsync(player.UserId .. "trails")
         }
     end)
     return success, err
@@ -111,18 +114,7 @@ marketPlaceService.ProcessReceipt = function(recieptInfo)
     end
 end
 
-buyCoins.OnServerEvent:Connect(function(player, frame)
-    local success, err = getPlayerData(player)
-    if success and success ~= nil then
-        buyCoins:FireClient(player, frame)
-    end
-end)
-
-function formatNumberWithCommas(number)
-  local formattedNumber = string.format("%d", number)
-  local left, num, right = string.match(formattedNumber, '^([^%d]*%d)(%d*)(.-)$')
-  return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
-end
+local trails = {}
 
 game.Players.PlayerAdded:Connect(function(player)
     local leaderstats = Instance.new("Folder", player)
@@ -151,6 +143,13 @@ game.Players.PlayerAdded:Connect(function(player)
             save.Value = true
 	        stage.Value = dataStore:GetAsync(player.UserId .. "stage")
 	        coins.Value = dataStore:GetAsync(player.UserId .. "coins")
+            if coins.Value == nil then
+                coins.Value = 0
+            end
+            if stage.Value == nil then
+                stage.Value = 0
+            end
+            trails = dataStore:GetAsync(player.UserId .. "trails")
 	        --print("Successful")
 	    else
 	        print(err)
@@ -158,6 +157,11 @@ game.Players.PlayerAdded:Connect(function(player)
 	        coins.Value = 0
 	    end
         spawnPlayer(player, stage.Value, "dead", true)
+        if trails == nil then
+            trails = {}
+        end
+        print(trails)
+        sendTrails:FireClient(player, trails)
 		task.wait(3)
 	until success or counter == 5
 end)
@@ -167,13 +171,14 @@ game.Players.PlayerRemoving:Connect(function(player)
     local leaderstats = player.leaderstats
     local stage = leaderstats.Stage
     local coins = leaderstats.Coins
-
     local success, err = getPlayerData(player)
-	if success and save.Value == true then
+    --trails = {}
+    if success and save.Value == true then
         local success, err = pcall(function()
             return {
                 dataStore:SetAsync(player.UserId .. "stage", stage.Value),
-                dataStore:SetAsync(player.UserId .. "coins", coins.Value)
+                dataStore:SetAsync(player.UserId .. "coins", coins.Value),
+                dataStore:SetAsync(player.UserId .. "trails", trails)
             }
         end)
 
@@ -182,3 +187,27 @@ game.Players.PlayerRemoving:Connect(function(player)
         end
     end
 end)
+
+buyCoins.OnServerEvent:Connect(function(player, frame)
+    local success, err = getPlayerData(player)
+    if success and success ~= nil then
+        buyCoins:FireClient(player, frame)
+    end
+end)
+
+local buyTrail = game:GetService("ReplicatedStorage"):WaitForChild("BuyTrail")
+buyTrail.OnServerEvent:Connect(function(player, name, price)
+    if dataStore:GetAsync(player.UserId .. "trails") then
+        local trailsTable = dataStore:GetAsync(player.UserId .. "trails")
+        if not table.find(trailsTable, name) then
+            table.insert(trails, name)
+        end
+    end
+    sendTrails:FireClient(player, trails)
+end)
+
+function formatNumberWithCommas(number)
+  local formattedNumber = string.format("%d", number)
+  local left, num, right = string.match(formattedNumber, '^([^%d]*%d)(%d*)(.-)$')
+  return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+end

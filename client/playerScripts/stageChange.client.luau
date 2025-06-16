@@ -1,6 +1,6 @@
 local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local updateCoins = game:GetService("ReplicatedStorage").ChangeCoins
-local spawners = workspace.Spawners
+local spawners = workspace:WaitForChild("Spawners")
 local player = game:GetService("Players").LocalPlayer
 local leaderstats = player:WaitForChild("leaderstats")
 local stage = leaderstats:WaitForChild("Stage")

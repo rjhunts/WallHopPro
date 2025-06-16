@@ -5,7 +5,6 @@ function localFunctions.tweenStage(spawner)
 	local tweenService = game:GetService("TweenService")
 	local tweenInfo = TweenInfo.new(0.75, Enum.EasingStyle.Back, Enum.EasingDirection.InOut, 0)
 	local tweenInfo_2 = TweenInfo.new(0.75, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0)
-
 	local properties = {
 		CFrame = spawner.CFrame * CFrame.Angles(0, math.rad(180), 0),
 	}
@@ -90,7 +89,8 @@ end
 
 function localFunctions.loopButtons()
 	local dynamicFolder = game.Workspace:WaitForChild("Dynamic")
-	local UITimer = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("Timer")
+	local player = game:GetService("Players").LocalPlayer
+	local UITimer = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("Timer")
 	for _, v in dynamicFolder:GetChildren() do
 		task.spawn(function()
 			if v.Name == "Transparent" then
@@ -104,7 +104,7 @@ function localFunctions.loopButtons()
 				local trigger = button.Trigger
 				local debounce = true
 				trigger.Touched:Connect(function(object)
-					if object.Parent.Humanoid and debounce then
+					if object.Parent.Humanoid and object.Parent == player.Character and debounce then
 						UITimer.Visible = true
 						debounce = false
 						active.Value = true

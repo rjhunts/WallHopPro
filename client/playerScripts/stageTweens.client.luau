@@ -9,7 +9,6 @@ local tweenStage = functions.tweenStage
 local spawners = workspace:WaitForChild("Spawners")
 local fadeParticles = functions.fadeParticles
 local playerUI = player:WaitForChild("PlayerGui")
-local screenUI = playerUI:WaitForChild("ScreenGui")
 
 local tweenInfo1 = TweenInfo.new(
 	1,
@@ -72,6 +71,8 @@ Tween2:Play()
 function validateStage(currentStage)
 	local isNil = true
 	local spawnList = {}
+	local screenUI = playerUI:WaitForChild("ScreenGui")
+	
 	for i, v in pairs(spawners:GetChildren()) do
 		spawnList[i] = v.Name
 		if v.Name == tostring(currentStage.Value + 1) then
@@ -88,6 +89,7 @@ function validateStage(currentStage)
 			end
 		end
 	end
+
 	if table.find(spawnList, tostring(currentStage.Value + 1)) == nil then
 		screenUI:WaitForChild("SkipFrame").Visible = false
 		task.spawn(function()

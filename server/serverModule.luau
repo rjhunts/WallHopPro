@@ -56,7 +56,7 @@ function functions.spawnPlayer(player, stage, status, isForced)
 	elseif status == "alive" and isForced then
 		--print(player.Name .. ",", "Stage:", tostring(stage), "Status:", status .. ",", "isForced =", isForced)
 		local character = player.Character or player.CharacterAdded:Wait()
-		character.HumanoidRootPart.CFrame = spawner.CFrame + Vector3.new(0, 3, 0)
+		character:WaitForChild("HumanoidRootPart").CFrame = spawner.CFrame + Vector3.new(0, 3, 0)
 	end
 end
 
@@ -104,6 +104,43 @@ function functions.playerCollisions(descendant)
 	PhysicsService:CollisionGroupSetCollidable("Characters", "Characters", false)
 	if descendant:IsA("BasePart") then
 		descendant.CollisionGroup = "Characters"
+	end
+end
+
+function functions.purchaseTrail(player, frameName, price)
+	player.leaderstats.Coins.Value -= price
+end
+
+function functions.toggleTrail(player, trailFrame, toggle)
+	local character = player.Character or player.Character:Wait()
+	local trails = game:GetService("ServerStorage"):WaitForChild("Trails")
+
+	local function destroyAttachment(bodyPart, attachmentName)
+		local characterParts = {}
+		for i, v in bodyPart:GetChildren() do
+			table.insert(characterParts, v.Name)
+		end
+		if table.find(characterParts, attachmentName) then
+			bodyPart:FindFirstChild(`{attachmentName}`):Destroy()
+		end
+	end
+
+	if toggle then
+		local trail = trails[`{trailFrame}`].Trail:Clone()
+		trail.Parent = character.Head
+		destroyAttachment(character.Head, "Attachment0")
+		destroyAttachment(character.HumanoidRootPart, "Attachment1")
+		local A0 = Instance.new("Attachment", character.HumanoidRootPart)
+		local A1 = Instance.new("Attachment", character.HumanoidRootPart)
+		A0.Name = "Attachment0"
+		A1.Name = "Attachment1"
+		A0.Position = Vector3.new(-1, 0, 0)
+		A1.Position = Vector3.new(1, 0, 0)
+		trail.Attachment0 = A0
+		trail.Attachment1 = A1
+	elseif not toggle then
+		destroyAttachment(character.Head, "Attachment0")
+		destroyAttachment(character.HumanoidRootPart, "Attachment1")
 	end
 end
 
