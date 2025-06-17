@@ -99,7 +99,6 @@ end
 
 function functions.playerCollisions(descendant)
 	local PhysicsService = game:GetService("PhysicsService")
-	local Players = game:GetService("Players")
 	PhysicsService:RegisterCollisionGroup("Characters")
 	PhysicsService:CollisionGroupSetCollidable("Characters", "Characters", false)
 	if descendant:IsA("BasePart") then
@@ -141,6 +140,33 @@ function functions.toggleTrail(player, trailFrame, toggle)
 	elseif not toggle then
 		destroyAttachment(character.Head, "Attachment0")
 		destroyAttachment(character.HumanoidRootPart, "Attachment1")
+	end
+end
+
+function functions.purchaseHalo(player, frameName, price)
+	player.leaderstats.Coins.Value -= price
+end
+
+function functions.toggleHalo(player, haloFrame, toggle)
+	local character = player.Character or player.Character:Wait()
+	local halos = game:GetService("ServerStorage"):WaitForChild("Halos")
+
+	if toggle then
+		for _, v in character:GetChildren() do
+			if v.Name == "Halo" then
+				v:Destroy()
+			end
+		end
+		local halo = halos[`{haloFrame}`]:Clone()
+		halo.Parent = character
+		halo.Name = "Halo"
+
+	elseif not toggle then
+		for _, v in character:GetChildren() do
+			if v.Name == "Halo" then
+				v:Destroy()
+			end
+		end
 	end
 end
 

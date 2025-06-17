@@ -2,6 +2,8 @@ local Players = game:GetService("Players")
 local buyCoins = game:GetService("ReplicatedStorage"):WaitForChild("BuyCoins")
 local sendTrails = game:GetService("ReplicatedStorage"):WaitForChild("SendTrails")
 local getTrails = game:GetService("ReplicatedStorage"):WaitForChild("GetTrails")
+local sendHalos = game:GetService("ReplicatedStorage"):WaitForChild("SendHalos")
+local getHalos = game:GetService("ReplicatedStorage"):WaitForChild("GetHalos")
 local dataStoreService = game:GetService("DataStoreService")
 local dataStore = dataStoreService:GetDataStore("database")
 local functions = require(script.Parent.serverModule)
@@ -12,7 +14,8 @@ function getPlayerData(player)
         return {
             dataStore:GetAsync(player.UserId .. "stage") and
             dataStore:GetAsync(player.UserId .. "coins") and
-            dataStore:GetAsync(player.UserId .. "trails")
+            dataStore:GetAsync(player.UserId .. "trails") and
+            dataStore:GetAsync(player.UserId .. "halos")
         }
     end)
     return success, err
@@ -115,78 +118,7 @@ marketPlaceService.ProcessReceipt = function(recieptInfo)
 end
 
 local trails = {}
-
-game.Players.PlayerAdded:Connect(function(player)
-    local leaderstats = Instance.new("Folder", player)
-    leaderstats.Name = "leaderstats"
-    
-    local stage = Instance.new("IntValue", leaderstats)
-    local coins = Instance.new("IntValue", leaderstats)
-    stage.Name = "Stage"
-    coins.Name = "Coins"
-
-    coins.Changed:Connect(function(value)
-        local UI = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
-        local displayCoins = UI:WaitForChild("CosmeticsFrame"):WaitForChild("DisplayCoins")
-        displayCoins.Text = formatNumberWithCommas(value)
-    end)
-
-    local save = Instance.new("BoolValue", player)
-    save.Name = "SaveData"
-    save.Value = false
-
-    local counter = 0
-    repeat
-        counter += 1
-        local success, err = getPlayerData(player)
-        if success and success ~= nil then
-            save.Value = true
-	        stage.Value = dataStore:GetAsync(player.UserId .. "stage")
-	        coins.Value = dataStore:GetAsync(player.UserId .. "coins")
-            if coins.Value == nil then
-                coins.Value = 0
-            end
-            if stage.Value == nil then
-                stage.Value = 0
-            end
-            trails = dataStore:GetAsync(player.UserId .. "trails")
-	        --print("Successful")
-	    else
-	        print(err)
-	        stage.Value = 0
-	        coins.Value = 0
-	    end
-        spawnPlayer(player, stage.Value, "dead", true)
-        if trails == nil then
-            trails = {}
-        end
-        print(trails)
-        sendTrails:FireClient(player, trails)
-		task.wait(3)
-	until success or counter == 5
-end)
-
-game.Players.PlayerRemoving:Connect(function(player)
-    local save = player:FindFirstChild("SaveData")
-    local leaderstats = player.leaderstats
-    local stage = leaderstats.Stage
-    local coins = leaderstats.Coins
-    local success, err = getPlayerData(player)
-    --trails = {}
-    if success and save.Value == true then
-        local success, err = pcall(function()
-            return {
-                dataStore:SetAsync(player.UserId .. "stage", stage.Value),
-                dataStore:SetAsync(player.UserId .. "coins", coins.Value),
-                dataStore:SetAsync(player.UserId .. "trails", trails)
-            }
-        end)
-
-        if not success then
-            print(err)
-        end
-    end
-end)
+local halos = {}
 
 buyCoins.OnServerEvent:Connect(function(player, frame)
     local success, err = getPlayerData(player)
@@ -206,8 +138,110 @@ buyTrail.OnServerEvent:Connect(function(player, name, price)
     sendTrails:FireClient(player, trails)
 end)
 
+local buyHalo = game:GetService("ReplicatedStorage"):WaitForChild("BuyHalo")
+buyHalo.OnServerEvent:Connect(function(player, name, price)
+    if dataStore:GetAsync(player.UserId .. "halos") then
+        local halosTable = dataStore:GetAsync(player.UserId .. "halos")
+        if not table.find(halosTable, name) then
+            table.insert(halos, name)
+        end
+    end
+    sendHalos:FireClient(player, halos)
+end)
+
+game.Players.PlayerAdded:Connect(function(player)
+
+    local function showCoins(value)
+        local UI = player:WaitForChild("PlayerGui"):WaitForChild("ScreenGui")
+        local displayCoins = UI:WaitForChild("CosmeticsFrame"):WaitForChild("DisplayCoins")
+        displayCoins.Text = formatNumberWithCommas(value)
+    end
+
+    local leaderstats = Instance.new("Folder", player)
+    leaderstats.Name = "leaderstats"
+    
+    local stage = Instance.new("IntValue", leaderstats)
+    local coins = Instance.new("IntValue", leaderstats)
+    stage.Name = "Stage"
+    coins.Name = "Coins"
+
+    coins.Changed:Connect(function(value)
+        showCoins(value)
+    end)
+
+    local save = Instance.new("BoolValue", player)
+    save.Name = "SaveData"
+    save.Value = false
+
+    local counter = 0
+    repeat
+        counter += 1
+        local success, err = getPlayerData(player)
+        if success and success ~= nil then
+            save.Value = true
+	        if dataStore:GetAsync(player.UserId .. "stage") ~= nil then
+                stage.Value = dataStore:GetAsync(player.UserId .. "stage")
+            else
+                stage.Value = 0
+            end
+	        if dataStore:GetAsync(player.UserId .. "coins") ~= nil then
+                coins.Value = dataStore:GetAsync(player.UserId .. "coins")
+            else
+                coins.Value = 0
+            end
+            trails = dataStore:GetAsync(player.UserId .. "trails")
+            halos = dataStore:GetAsync(player.UserId .. "halos")
+	        --print("Successful")
+	    else
+	        print(err)
+	        stage.Value = 0
+	        coins.Value = 0
+	    end
+        spawnPlayer(player, stage.Value, "dead", true)
+        if trails == nil then trails = {} end
+        if halos == nil then halos = {} end
+
+        --showCoins(coins.Value)
+        showCoins(coins.Value)
+        sendTrails:FireClient(player, trails)
+        sendHalos:FireClient(player, halos)
+
+        player.CharacterAdded:Connect(function()
+            showCoins(coins.Value)
+            sendTrails:FireClient(player, trails)
+            print(trails)
+            sendHalos:FireClient(player, halos)
+        end)
+		task.wait(3)
+	until success or counter == 5
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    local save = player:FindFirstChild("SaveData")
+    local leaderstats = player.leaderstats
+    local stage = leaderstats.Stage
+    local coins = leaderstats.Coins
+    local success, err = getPlayerData(player)
+    --trails = {}
+    --halos = {}
+    if success and save.Value == true then
+        local success, err = pcall(function()
+            return {
+                dataStore:SetAsync(player.UserId .. "stage", stage.Value),
+                dataStore:SetAsync(player.UserId .. "coins", coins.Value),
+                dataStore:SetAsync(player.UserId .. "trails", trails),
+                dataStore:SetAsync(player.UserId .. "halos", halos)
+            }
+        end)
+
+        if not success then
+            print(err)
+        end
+    end
+end)
+
 function formatNumberWithCommas(number)
-  local formattedNumber = string.format("%d", number)
-  local left, num, right = string.match(formattedNumber, '^([^%d]*%d)(%d*)(.-)$')
-  return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
+    local formattedNumber = string.format("%d", number)
+    local left, num, right = string.match(formattedNumber, '^([^%d]*%d)(%d*)(.-)$')
+    return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
 end

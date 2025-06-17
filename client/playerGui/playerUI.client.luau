@@ -3,8 +3,6 @@ local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
 local revivePlayer = game:GetService("ReplicatedStorage").RevivePlayer
 local getItems = game:GetService("ReplicatedStorage").GetItems
-local getTrails = game:GetService("ReplicatedStorage"):WaitForChild("GetTrails")
-local sendTrails = game:GetService("ReplicatedStorage"):WaitForChild("SendTrails")
 local UIS = game:GetService("UserInputService")
 local leaderstats = player:WaitForChild("leaderstats")
 local stage = leaderstats:WaitForChild("Stage")
@@ -95,6 +93,14 @@ skipButton.MouseButton1Click:Connect(function()
 	marketPlaceService:PromptProductPurchase(player, 3303947543)
 end)
 
+skipButton.MouseEnter:Connect(function()
+	skipButton.TextTransparency = 0.25
+end)
+
+skipButton.MouseLeave:Connect(function()
+	skipButton.TextTransparency = 0
+end)
+
 -- Coins UI
 
 for _, frame in coinsFrame:GetChildren() do
@@ -173,6 +179,7 @@ end
 local currentStage = tonumber(stageNumber.Text)
 stageNumber.Changed:Connect(function(value)
 	currentStage = tonumber(stageNumber.Text)
+	playMusic()
 end)
 
 UIS.InputBegan:Connect(function(input, gameProcess)
@@ -193,14 +200,12 @@ function firstStage()
 	currentStage = 0
 	stageNumber.Text = currentStage
 	hrp.CFrame = spawners[currentStage].CFrame + Vector3.new(0, 3.5, 0)
-	playMusic()
 end
 
 function lastStage()
 	currentStage = stage.Value
 	stageNumber.Text = currentStage
 	hrp.CFrame = spawners[currentStage].CFrame + Vector3.new(0, 3.5, 0)
-	playMusic()
 end
 
 function incrementStage(value)
@@ -208,7 +213,6 @@ function incrementStage(value)
 	currentStage += value
 	stageNumber.Text = currentStage
 	hrp.CFrame = spawners[currentStage].CFrame + Vector3.new(0, 3.5, 0)
-	playMusic()
 	--print(currentStage)
 end
 
@@ -275,6 +279,12 @@ function playMusic()
 			pauseMusic()
 			music["Seek & Destroy"]:Resume()
 		end
+
+	elseif currentStage >= 40 and currentStage < 50 then
+		if not music["Metal Storm Breaks"].Playing then
+			pauseMusic()
+			music["Metal Storm Breaks"]:Resume()
+		end
 	end
 end
 
@@ -299,12 +309,12 @@ end)
 
 musicButton.MouseButton1Click:Connect(function()
 	if musicButton.Text == "ON" then
-		musicButton.Text = "OFF"
-		musicButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+		--[[musicButton.Text = "OFF"
+		musicButton.TextColor3 = Color3.fromRGB(255, 0, 0)]]
 		pauseMusic()
 	else
-		musicButton.Text = "ON"
-		musicButton.TextColor3 = Color3.fromRGB(0, 255, 0)
+		--[[musicButton.Text = "ON"
+		musicButton.TextColor3 = Color3.fromRGB(0, 255, 0)]]
 		playMusic()
 	end
 end)
@@ -315,38 +325,6 @@ end)
 
 playerButton.MouseLeave:Connect(function()
 	playerButton.TextTransparency = 0
-end)
-
-function togglePlayers(transparency)
-	local players = game:GetService("Players")
-	local player = players.LocalPlayer
-	for i, plr in pairs(players:GetPlayers()) do
-		if plr.Name ~= player.Name then
-			local char = plr.Character
-			for i, child in pairs(char:GetChildren()) do
-				if child:IsA("Part") and child.Name ~= "HumanoidRootPart" or child:IsA("MeshPart") then
-					if child.Name == "Head" then
-						child:FindFirstChild("face").Transparency = transparency
-					end
-					child.Transparency = transparency
-				elseif child:IsA("Accessory") then
-					child:FindFirstChild("Handle").Transparency = transparency
-				end
-			end
-		end
-	end
-end
-
-playerButton.MouseButton1Click:Connect(function()
-	if playerButton.Text == "ON" then
-		playerButton.Text = "OFF"
-		playerButton.TextColor3 = Color3.fromRGB(255, 0, 0)
-		togglePlayers(1)
-	else
-		playerButton.Text = "ON"
-		playerButton.TextColor3 = Color3.fromRGB(0, 255, 0)
-		togglePlayers(0)
-	end
 end)
 
 --[[
@@ -391,6 +369,14 @@ cosmeticsButton.MouseButton1Click:Connect(function()
 	switchFrame(cosmeticFrame)
 end)
 
+cosmeticsButton.MouseEnter:Connect(function()
+	cosmeticsButton.TextTransparency = 0.25
+end)
+
+cosmeticsButton.MouseLeave:Connect(function()
+	cosmeticsButton.TextTransparency = 0
+end)
+
 cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseButton1Click:Connect(function()
 	for i, v in cosmeticFrame.ScrollingFrame:GetChildren() do
 		if v.ClassName == "Frame" then
@@ -400,6 +386,22 @@ cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseButton1Click:Conne
 	cosmeticFrame.ScrollingFrame.TrailsFrame.Visible = true
 end)
 
+cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseEnter:Connect(function()
+	cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.TextTransparency = 0.25
+end)
+
+cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseLeave:Connect(function()
+	cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.TextTransparency = 0
+end)
+
+cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.MouseEnter:Connect(function()
+	cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.TextTransparency = 0.25
+end)
+
+cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.MouseLeave:Connect(function()
+	cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.TextTransparency = 0
+end)
+
 cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.MouseButton1Click:Connect(function()
 	for i, v in cosmeticFrame.ScrollingFrame:GetChildren() do
 		if v.ClassName == "Frame" then
@@ -407,61 +409,6 @@ cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.MouseButton1Click:Connect
 		end
 	end
 	cosmeticFrame.ScrollingFrame.HalosFrame.Visible = true
-end)
-
-local trails = {}
-sendTrails.OnClientEvent:Connect(function(trailsTable)
-	trails = trailsTable
-end)
-
-local trailsFrame = cosmeticFrame.ScrollingFrame.TrailsFrame
-local buyTrail = game:GetService("ReplicatedStorage"):WaitForChild("BuyTrail")
-local equipTrail = game:GetService("ReplicatedStorage"):WaitForChild("EquipTrail")
-for _, v in trailsFrame:GetChildren() do
-	if v.ClassName == "Frame" then
-		v.TextButton.MouseButton1Click:Connect(function()
-			if leaderstats.Coins.Value >= v.Price.Value and v.TextButton.Text ~= "Equip" and table.find(trails, v.Name) == nil then
-				v.TextButton.Text = "Equip"
-				v.TextLabel.Text = "Owned"
-				buyTrail:FireServer(v.Name, v.Price.Value)
-
-			elseif v.TextButton.Text == "Equip" and table.find(trails, v.Name) then
-				for i, v in trailsFrame:GetChildren() do
-					if v.ClassName == "Frame" and table.find(trails, v.Name) then
-						v.TextButton.Text = "Equip"
-					end
-				end
-				v.TextButton.Text = "Unequip"
-				equipTrail:FireServer(v.Name, true)
-
-			elseif v.TextButton.Text == "Unequip" and table.find(trails, v.Name) then
-				v.TextButton.Text = "Equip"
-				equipTrail:FireServer(v.Name, false)
-			end
-		end)
-	end
-end
-
-sendTrails.OnClientEvent:Connect(function(trailsTable)
-	for _, v in trailsFrame:GetChildren() do
-		if v.ClassName == "Frame" and table.find(trailsTable, v.Name) ~= nil then
-			v.TextButton.Text = "Equip"
-			v.TextLabel.Text = "Owned"
-		end
-	end
-end)
-
-getTrails.OnClientEvent:Connect(function()
-	local trailsTable = {}
-	for _, v in trailsFrame:GetChildren() do
-		if v.ClassName == "Frame" then
-			local textButton = v.TextButton
-			if textButton.Text == "Equip" then
-				table.insert(trailsTable, v)
-			end
-		end
-	end
-	getTrails:FireServer(trailsTable)
 end)
 
 -- Settings UI

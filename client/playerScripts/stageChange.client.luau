@@ -14,7 +14,7 @@ for i, spawner in pairs(spawners:GetChildren()) do
 			if game.Players:GetPlayerFromCharacter(hit.Parent) == player then
 				if stage.Value == spawner.Name - 1 then
 					changeStage:FireServer(spawners[stage.Value + 1])
-					updateCoins:FireServer(coins.Value + 10)
+					updateCoins:FireServer(coins.Value + math.random(10, 50))
 				elseif tonumber(spawner.Name) <= stage.Value then
 					local stageNumber = player.PlayerGui:WaitForChild("ScreenGui").StagesFrame.ButtonsFrame.ImageLabel.StageNumber
 					stageNumber.Text = spawner.Name

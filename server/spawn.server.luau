@@ -4,6 +4,8 @@ local changeStage = game:GetService("ReplicatedStorage").ChangeStage
 local changeCoins = game:GetService("ReplicatedStorage").ChangeCoins
 local buyTrail = game:GetService("ReplicatedStorage").BuyTrail
 local equipTrail = game:GetService("ReplicatedStorage").EquipTrail
+local buyHalo = game:GetService("ReplicatedStorage").BuyHalo
+local equipHalo = game:GetService("ReplicatedStorage").EquipHalo
 local ragdollModule = require(game:GetService("ReplicatedStorage").ragdollModule)
 local characters = workspace:WaitForChild("Characters")
 local players = game:GetService("Players")
@@ -14,6 +16,8 @@ local updateStage = functions.changeStage
 local updateCoins = functions.updateCoins
 local purchaseTrail = functions.purchaseTrail
 local toggleTrail = functions.toggleTrail
+local purchaseHalo = functions.purchaseHalo
+local toggleHalo = functions.toggleHalo
 
 players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
@@ -59,6 +63,9 @@ changeStage.OnServerEvent:Connect(updateStage)
 changeCoins.OnServerEvent:Connect(updateCoins)
 buyTrail.OnServerEvent:Connect(purchaseTrail)
 equipTrail.OnServerEvent:Connect(toggleTrail)
+buyHalo.OnServerEvent:Connect(purchaseHalo)
+equipHalo.OnServerEvent:Connect(toggleHalo)
+
 getItems.OnServerEvent:Connect(function(player, item)
 	local items = game:GetService("ServerStorage"):WaitForChild("Items")
 	local clonedItem = items[`{item}`]:Clone()
