@@ -8,6 +8,9 @@ local leaderstats = player:WaitForChild("leaderstats")
 local stage = leaderstats:WaitForChild("Stage")
 local spawners = workspace:WaitForChild("Spawners")
 local UI = script.Parent.Parent.ScreenGui
+local audio = UI:WaitForChild("Audio")
+local hoverSound = audio["Audio/TouchBeep"]
+local clickSound = audio.Click
 local buttons = UI.ButtonsFrame
 local buttons2 = UI.ButtonsFrame2
 local playerScripts = player:WaitForChild("PlayerScripts")
@@ -56,6 +59,8 @@ local buyCoins = game:GetService("ReplicatedStorage"):WaitForChild("BuyCoins")
 -- Reset UI Variables
 
 local resetFrame = buttons2.ResetFrame
+local slapFrame = buttons2.BuySlap
+local slapButton = slapFrame.ImageLabel.PromptSlap
 local resetButton = resetFrame.ImageLabel.Reset
 
 -- Settings UI Variables
@@ -91,9 +96,11 @@ local marketPlaceService = game:GetService("MarketplaceService")
 
 skipButton.MouseButton1Click:Connect(function()
 	marketPlaceService:PromptProductPurchase(player, 3303947543)
+	clickSound:Play()
 end)
 
 skipButton.MouseEnter:Connect(function()
+	hoverSound:Play()
 	skipButton.TextTransparency = 0.25
 end)
 
@@ -107,6 +114,7 @@ for _, frame in coinsFrame:GetChildren() do
 	if frame.ClassName == "Frame" then
 		local button = frame.TextButton
 		button.MouseButton1Click:Connect(function()
+			clickSound:Play()
 			buyCoins:FireServer(frame.Name)
 		end)
 	end
@@ -132,18 +140,21 @@ end)
 
 gravityCoilFrame.TextButton.MouseButton1Click:Connect(function()
 	if gravityCoilFrame.TextButton.Text == "Buy" then
+		clickSound:Play()
 		marketPlaceService:PromptGamePassPurchase(player, 1250422439)
 	end
 end)
 
 speedCoilFrame.TextButton.MouseButton1Click:Connect(function()
 	if speedCoilFrame.TextButton.Text == "Buy" then
+		clickSound:Play()
 		marketPlaceService:PromptGamePassPurchase(player, 1246890966)
 	end
 end)
 
 fusionCoilFrame.TextButton.MouseButton1Click:Connect(function()
 	if fusionCoilFrame.TextButton.Text == "Buy" then
+		clickSound:Play()
 		marketPlaceService:PromptGamePassPurchase(player, 1249784608)
 	end
 end)
@@ -160,6 +171,9 @@ marketPlaceService.PromptGamePassPurchaseFinished:Connect(function(player, gameP
 	elseif gamePassId == 1249784608 and wasPurchased then
 		getItems:FireServer("Fusion Coil")
 		fusionCoilFrame.TextButton.Text = "Owned"
+
+	elseif gamePassId == 1274247716 and wasPurchased then
+		getItems:FireServer("Slap Glove")
 	end
 end)
 
@@ -168,6 +182,7 @@ end)
 for i, v in pairs(stageButtons.ImageLabel:GetChildren()) do
 	if v.ClassName == "TextButton" then
 		v.MouseEnter:Connect(function()
+			hoverSound:Play()
 			v.TextTransparency = 0.25
 		end)
 		v.MouseLeave:Connect(function()
@@ -217,6 +232,7 @@ function incrementStage(value)
 end
 
 forward.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	if currentStage < stage.Value then
 		incrementStage(1)
 	elseif currentStage == stage.Value then
@@ -225,6 +241,7 @@ forward.MouseButton1Click:Connect(function()
 end)
 
 doubleForward.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	if currentStage <= stage.Value - 10 then
 		incrementStage(10)
 	elseif currentStage == stage.Value then
@@ -235,6 +252,7 @@ doubleForward.MouseButton1Click:Connect(function()
 end)
 
 back.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	if currentStage > 0 then
 		incrementStage(-1)
 	elseif currentStage == 0 then
@@ -243,6 +261,7 @@ back.MouseButton1Click:Connect(function()
 end)
 
 doubleBack.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	if currentStage - 10 >= 0 then
 		incrementStage(-10)
 	elseif currentStage == 0 then
@@ -300,6 +319,7 @@ end
 playMusic()
 
 musicButton.MouseEnter:Connect(function()
+	hoverSound:Play()
 	musicButton.TextTransparency = 0.25
 end)
 
@@ -308,6 +328,7 @@ musicButton.MouseLeave:Connect(function()
 end)
 
 musicButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	if musicButton.Text == "ON" then
 		--[[musicButton.Text = "OFF"
 		musicButton.TextColor3 = Color3.fromRGB(255, 0, 0)]]
@@ -320,6 +341,7 @@ musicButton.MouseButton1Click:Connect(function()
 end)
 
 playerButton.MouseEnter:Connect(function()
+	hoverSound:Play()
 	playerButton.TextTransparency = 0.25
 end)
 
@@ -350,10 +372,12 @@ end)
 -- Shop UI
 
 shopButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	switchFrame(shopFrame)
 end)
 
 shopButton.MouseEnter:Connect(function()
+	hoverSound:Play()
 	shopButton.TextTransparency = 0.25
 	--shopButton.Parent.ImageTransparency = 0.75
 end)
@@ -366,10 +390,12 @@ end)
 -- Cosmetics UI
 
 cosmeticsButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	switchFrame(cosmeticFrame)
 end)
 
 cosmeticsButton.MouseEnter:Connect(function()
+	hoverSound:Play()
 	cosmeticsButton.TextTransparency = 0.25
 end)
 
@@ -377,7 +403,20 @@ cosmeticsButton.MouseLeave:Connect(function()
 	cosmeticsButton.TextTransparency = 0
 end)
 
-cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseButton1Click:Connect(function()
+local trailsFrame = cosmeticFrame.ButtonsFrame.TrailsFrame
+local halosFrame = cosmeticFrame.ButtonsFrame.HalosFrame
+
+trailsFrame.ImageLabel.Trails.MouseEnter:Connect(function()
+	hoverSound:Play()
+	trailsFrame.ImageLabel.Trails.TextTransparency = 0.25
+end)
+
+trailsFrame.ImageLabel.Trails.MouseLeave:Connect(function()
+	trailsFrame.ImageLabel.Trails.TextTransparency = 0
+end)
+
+trailsFrame.ImageLabel.Trails.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	for i, v in cosmeticFrame.ScrollingFrame:GetChildren() do
 		if v.ClassName == "Frame" then
 			v.Visible = false
@@ -386,23 +425,17 @@ cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseButton1Click:Conne
 	cosmeticFrame.ScrollingFrame.TrailsFrame.Visible = true
 end)
 
-cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseEnter:Connect(function()
-	cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.TextTransparency = 0.25
+halosFrame.ImageLabel.Halos.MouseEnter:Connect(function()
+	hoverSound:Play()
+	halosFrame.ImageLabel.Halos.TextTransparency = 0.25
 end)
 
-cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.MouseLeave:Connect(function()
-	cosmeticFrame.ButtonsFrame.TrailsFrame.ImageLabel.Trails.TextTransparency = 0
+halosFrame.ImageLabel.Halos.MouseLeave:Connect(function()
+	halosFrame.ImageLabel.Halos.TextTransparency = 0
 end)
 
-cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.MouseEnter:Connect(function()
-	cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.TextTransparency = 0.25
-end)
-
-cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.MouseLeave:Connect(function()
-	cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.TextTransparency = 0
-end)
-
-cosmeticFrame.ButtonsFrame.HalosFrame.ImageLabel.Halos.MouseButton1Click:Connect(function()
+halosFrame.ImageLabel.Halos.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	for i, v in cosmeticFrame.ScrollingFrame:GetChildren() do
 		if v.ClassName == "Frame" then
 			v.Visible = false
@@ -414,10 +447,12 @@ end)
 -- Settings UI
 
 settingsButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	switchFrame(settingsFrame)
 end)
 
 settingsButton.MouseEnter:Connect(function()
+	hoverSound:Play()
 	settingsButton.TextTransparency = 0.25
 	--settingsButton.Parent.ImageTransparency = 0.75
 end)
@@ -430,6 +465,7 @@ end)
 -- Reset UI
 
 resetButton.MouseEnter:Connect(function()
+	hoverSound:Play()
 	resetButton.TextTransparency = 0.25
 	--resetButton.Parent.ImageTransparency = 0.75
 end)
@@ -439,8 +475,18 @@ resetButton.MouseLeave:Connect(function()
 	--resetButton.Parent.ImageTransparency = 0.9
 end)
 
+slapButton.MouseEnter:Connect(function()
+	hoverSound:Play()
+	slapButton.ImageTransparency = 0.25
+	--resetButton.Parent.ImageTransparency = 0.75
+end)
+
+slapButton.MouseLeave:Connect(function()
+	slapButton.ImageTransparency = 0
+end)
+
 function respawn()
-	task.wait(3)
+	task.wait(1)
 	revivePlayer:FireServer(currentStage, "dead", true)
 	resetButtons()
 end
@@ -450,5 +496,14 @@ function teleport()
 	resetButtons()
 end
 
-resetButton.MouseButton1Click:Connect(teleport)
+resetButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
+	teleport()
+end)
+
+slapButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
+	marketPlaceService:PromptGamePassPurchase(player, 1274247716)
+end)
+
 character.Humanoid.Died:Connect(respawn)

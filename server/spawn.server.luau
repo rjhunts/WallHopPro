@@ -22,7 +22,7 @@ local toggleHalo = functions.toggleHalo
 players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
 		character:WaitForChild("Humanoid").BreakJointsOnDeath = false
-
+		character:WaitForChild("Humanoid").AutoJumpEnabled = false
 		character:WaitForChild("Humanoid").Died:Connect(function()
 			ragdollModule.SetRagdoll(character)
 		end)

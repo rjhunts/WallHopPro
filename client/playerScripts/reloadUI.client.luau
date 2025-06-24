@@ -99,6 +99,9 @@ end
 sendTrails.OnClientEvent:Connect(function(trailsTable)
     local leaderstats = player:WaitForChild("leaderstats")
     local UI = playerUI:WaitForChild("ScreenGui")
+    local audios = UI:WaitForChild("Audio")
+    local clickSound = audios:WaitForChild("Click")
+    local hoverSound = audios:WaitForChild("Audio/TouchBeep")
     local cosmeticFrame = UI:WaitForChild("CosmeticsFrame")
     local trailsFrame = cosmeticFrame:WaitForChild("ScrollingFrame"):WaitForChild("TrailsFrame")
     local trails = trailsTable
@@ -112,7 +115,11 @@ sendTrails.OnClientEvent:Connect(function(trailsTable)
     end
     for _, v in trailsFrame:GetChildren() do
         if v.ClassName == "Frame" then
+            v.TextButton.MouseEnter:Connect(function()
+                hoverSound:Play()
+            end)
             v.TextButton.MouseButton1Click:Connect(function()
+                clickSound:Play()
                 if leaderstats.Coins.Value >= v.Price.Value and v.TextButton.Text == "Buy" and table.find(trails, v.Name) == nil then
                     for i, v in trailsFrame:GetChildren() do
                         if v.ClassName == "Frame" and table.find(trails, v.Name) then
@@ -162,6 +169,9 @@ end)
 sendHalos.OnClientEvent:Connect(function(halosTable)
     local leaderstats = player:WaitForChild("leaderstats")
     local UI = playerUI:WaitForChild("ScreenGui")
+    local audios = UI:WaitForChild("Audio")
+    local clickSound = audios:WaitForChild("Click")
+    local hoverSound = audios:WaitForChild("Audio/TouchBeep")
     local cosmeticFrame = UI:WaitForChild("CosmeticsFrame")
     local halosFrame = cosmeticFrame:WaitForChild("ScrollingFrame"):WaitForChild("HalosFrame")
     local halos = halosTable
@@ -175,7 +185,11 @@ sendHalos.OnClientEvent:Connect(function(halosTable)
     end
     for _, v in halosFrame:GetChildren() do
         if v.ClassName == "Frame" then
+            v.TextButton.MouseEnter:Connect(function()
+                hoverSound:Play()
+            end)
             v.TextButton.MouseButton1Click:Connect(function()
+                clickSound:Play()
                 if leaderstats.Coins.Value >= v.Price.Value and v.TextButton.Text == "Buy" and table.find(halos, v.Name) == nil then
                     for i, v in halosFrame:GetChildren() do
                         if v.ClassName == "Frame" and table.find(halos, v.Name) then

@@ -11,18 +11,35 @@ local spawnPlayer = functions.spawnPlayer
 
 function getPlayerData(player)
     local success, err = pcall(function()
-        return {
-            dataStore:GetAsync(player.UserId .. "stage") and
-            dataStore:GetAsync(player.UserId .. "coins") and
-            dataStore:GetAsync(player.UserId .. "trails") and
-            dataStore:GetAsync(player.UserId .. "halos")
-        }
+        if dataStore:GetAsync(player.UserId .. "stage") == nil 
+        or dataStore:GetAsync(player.UserId .. "coins") == nil 
+        or dataStore:GetAsync(player.UserId .. "trails") == nil 
+        or dataStore:GetAsync(player.UserId .. "halos") == nil then
+            return false
+        end
     end)
-    return success, err
+    return true
 end
 
 local marketPlaceService = game:GetService("MarketplaceService")
+
 local products = {}
+
+marketPlaceService.ProcessReceipt = function(recieptInfo)
+    local playerId = recieptInfo.PlayerId
+    local productId = recieptInfo.ProductId
+    local player = Players:GetPlayerByUserId(playerId)
+    local coins = player.leaderstats.Coins
+    if products[productId] then
+        local result = products[productId](player)
+
+        if result then
+            dataStore:SetAsync(player.UserId .. "coins", coins.Value)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+        end
+        return Enum.ProductPurchaseDecision.NotProcessedYet
+    end
+end
 
 -- Skip Stage
 
@@ -100,23 +117,6 @@ products[3303944448] = function(player)
     return false
 end
 
-marketPlaceService.ProcessReceipt = function(recieptInfo)
-    local playerId = recieptInfo.PlayerId
-    local productId = recieptInfo.ProductId
-    local player = Players:GetPlayerByUserId(playerId)
-    local coins = player.leaderstats.Coins
-
-    if products[productId] then
-        local result = products[productId](player)
-
-        if result then
-            dataStore:SetAsync(player.UserId .. "coins", coins.Value)
-            return Enum.ProductPurchaseDecision.PurchaseGranted
-        end
-        return Enum.ProductPurchaseDecision.NotProcessedYet
-    end
-end
-
 local trails = {}
 local halos = {}
 
@@ -134,8 +134,9 @@ buyTrail.OnServerEvent:Connect(function(player, name, price)
         if not table.find(trailsTable, name) then
             table.insert(trails, name)
         end
+        dataStore:SetAsync(player.UserId .. "trails", trails)
+        sendTrails:FireClient(player, trails)
     end
-    sendTrails:FireClient(player, trails)
 end)
 
 local buyHalo = game:GetService("ReplicatedStorage"):WaitForChild("BuyHalo")
@@ -145,8 +146,9 @@ buyHalo.OnServerEvent:Connect(function(player, name, price)
         if not table.find(halosTable, name) then
             table.insert(halos, name)
         end
+        sendHalos:FireClient(player, halos)
+        dataStore:SetAsync(player.UserId .. "halos", halos)
     end
-    sendHalos:FireClient(player, halos)
 end)
 
 game.Players.PlayerAdded:Connect(function(player)
@@ -198,14 +200,23 @@ game.Players.PlayerAdded:Connect(function(player)
 	        coins.Value = 0
 	    end
         spawnPlayer(player, stage.Value, "dead", true)
-        if trails == nil then trails = {} end
-        if halos == nil then halos = {} end
+
+        if trails == nil then 
+            trails = {} 
+            dataStore:SetAsync(player.UserId .. "trails", {})
+        end
+
+        if halos == nil then 
+            halos = {} 
+            dataStore:SetAsync(player.UserId .. "halos", {})
+        end
 
         --showCoins(coins.Value)
         showCoins(coins.Value)
         sendTrails:FireClient(player, trails)
         sendHalos:FireClient(player, halos)
-
+        --print(halos)
+        --print(trails)
         player.CharacterAdded:Connect(function()
             showCoins(coins.Value)
             sendTrails:FireClient(player, trails)
@@ -222,22 +233,31 @@ game.Players.PlayerRemoving:Connect(function(player)
     local stage = leaderstats.Stage
     local coins = leaderstats.Coins
     local success, err = getPlayerData(player)
-    --trails = {}
-    --halos = {}
     if success and save.Value == true then
         local success, err = pcall(function()
-            return {
-                dataStore:SetAsync(player.UserId .. "stage", stage.Value),
-                dataStore:SetAsync(player.UserId .. "coins", coins.Value),
-                dataStore:SetAsync(player.UserId .. "trails", trails),
-                dataStore:SetAsync(player.UserId .. "halos", halos)
-            }
-        end)
+            dataStore:SetAsync(player.UserId .. "stage", stage.Value)
+            dataStore:SetAsync(player.UserId .. "coins", coins.Value)
 
-        if not success then
-            print(err)
-        end
+            local function isEmpty(t)
+                return next(t) == nil
+            end
+
+            if not isEmpty(trails) then
+                dataStore:SetAsync(player.UserId .. "trails", trails)
+            end
+            if not isEmpty(halos) then
+                dataStore:SetAsync(player.UserId .. "halos", halos)
+            end
+        end)
     end
+
+    if not success then
+        warn(`Could not find data table: {err}`)
+    end
+    --dataStore:RemoveAsync(player.UserId .. "trails")
+    --dataStore:RemoveAsync(player.UserId .. "halos")
+    print(dataStore:GetAsync(player.UserId .. "trails"))
+    print(dataStore:GetAsync(player.UserId .. "halos"))
 end)
 
 function formatNumberWithCommas(number)

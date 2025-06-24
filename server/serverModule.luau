@@ -23,6 +23,12 @@ function functions.checkPasses(player)
 		local fusionCoil = game:GetService("ServerStorage"):WaitForChild("Items"):WaitForChild("Fusion Coil"):Clone()
 		fusionCoil.Parent = backpack
 	end
+
+	if marketPlaceService:UserOwnsGamePassAsync(player.UserId, 1274247716) then
+		--print("Checked")
+		local slapGlove = game:GetService("ServerStorage"):WaitForChild("Items"):WaitForChild("Slap Glove"):Clone()
+		slapGlove.Parent = backpack
+	end
 end
 
 function functions.updateCoins(player, amount)
